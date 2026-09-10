@@ -7,6 +7,13 @@
 .type _start, %function
 
 _start:
+	/*
+	 * This example intentionally lets every PE run the startup path. That
+	 * creates a race condition while each PE initializes shared memory and
+	 * calls main(). The primary-pe-selection_ATfE example fixes this, and
+	 * the related guide explains why.
+	 */
+
 	/* Set the stack pointer before calling C code. */
 	ldr	x0, =__stack
 	mov	sp, x0

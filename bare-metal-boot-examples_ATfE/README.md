@@ -24,18 +24,17 @@ SOFTWARE.
 
 # Bare-metal Boot Examples
 
-
 ## Introduction
 
-These examples accompany the bare-metal boot guide for systems based on the
-Armv8-A and Armv9-A architectures. The guide explains the first steps that a
-system takes after reset, from fetching the first instruction at the reset
-vector to reaching a minimal `main()` function.
+These examples accompany the
+[A Profile Bare-Metal Boot Guide](https://developer.arm.com/documentation/112165/latest/)
+for systems based on the Armv8-A and Armv9-A architectures. The guide explains
+the first steps that a system takes after reset, from fetching the first
+instruction at the reset vector to reaching a minimal `main()` function.
 
 The examples are educational. They show reset handling, image placement,
 semihosting output, and simple primary PE selection on the `FVP_Base_AEMvA`
 model.
-
 
 ## Where These Examples Fit in the Guide
 
@@ -49,8 +48,8 @@ one of those stages.
   times.
 * `primary-pe-selection_ATfE` supports the "Choosing the primary PE" chapter.
   It extends the reset handler so that only the PE with full affinity
-  `0.0.0.0` continues to `main()`. Secondary PEs wait in a `wfe` loop.
-
+  `0.0.0.0` continues to `main()`. Secondary PEs wait in a `wfe` (wait for
+  event) loop.
 
 ## Overview
 
@@ -69,21 +68,25 @@ direct semihosting call needs only a few instructions in the example code. By
 contrast, `printf()` can require extra library code and runtime setup that
 would distract from the early boot steps that the guide is explaining.
 
-
 ## Requirements
-
-To use this code, you will need:
 
 * Arm Development Studio 2025 command prompt, or an equivalent command-line
   environment.
 * Arm Toolchain for Embedded, including `clang` for the `aarch64-none-elf`
   target.
+  * This toolchain is included with Arm Development Studio and can be selected
+    for the current terminal session by running the `select_toolchain.bat`
+    script from the Arm Development Studio command prompt.
 * Arm Fixed Virtual Platform (FVP) with the `FVP_Base_AEMvA` model.
+  * The FVP is also included with Arm Development Studio.
 
 The examples target the `FVP_Base_AEMvA` model. To run them on a different
 target, adapt the memory map, reset address, PE startup behavior, and output
 mechanism.
 
+Note: If you are not using the Arm Development Studio command prompt, `make`,
+`clang`, and `FVP_Base_AEMvA` must be available on your system `PATH`. Arm
+Development Studio includes `make.exe`.
 
 ## Structure
 
@@ -107,11 +110,25 @@ bare-metal-boot-examples_ATfE/
 Build output files, such as `startup.o`, `hello.o`, and `hello.elf`, can
 appear in each example directory after building.
 
-
 ## Building the Examples from the Command Prompt
 
 Run the build commands from the directory for the example that you want to
 build.
+
+Each example includes a Makefile. From the example directory, run:
+
+```sh
+make
+```
+
+This command builds `hello.elf`. You can also use the other Makefile targets:
+
+* `make run` builds `hello.elf`, then runs it on `FVP_Base_AEMvA`.
+* `make clean` removes generated build output files.
+* `make rebuild` removes generated build output files, then rebuilds
+  `hello.elf`.
+
+The following commands show the equivalent manual `clang` build steps.
 
 In `boot-image-placement_ATfE`, run:
 
@@ -135,11 +152,10 @@ clang startup.o hello.o --target=aarch64-none-elf -nostdlib -g \
 	-T linker.ld -o hello.elf
 ```
 
-
 ## Running the Model
 
 Run each command from the directory that contains the `hello.elf` file for
-that example.
+that example. You can also run the model by using the `make run` target.
 
 For `boot-image-placement_ATfE`, run:
 
@@ -156,7 +172,6 @@ FVP_Base_AEMvA -C bp.secure_memory=false hello.elf
 By default, `FVP_Base_AEMvA` starts 4 PEs. Use the
 `-C cluster0.NUM_CORES=<number>` option to set a different number of PEs. For
 example, `-C cluster0.NUM_CORES=3` starts 3 PEs.
-
 
 ## Expected Output
 
@@ -177,7 +192,6 @@ the primary PE:
 Hello from Arm bare metal!
 ```
 
-
 ## Additional Considerations
 
 * These examples are not complete boot firmware. They omit many features that
@@ -193,7 +207,7 @@ Hello from Arm bare metal!
 * If the model does not terminate automatically after the semihosting exit
   call, stop the simulation manually.
 
-
 ## License
 
-Example projects are licensed under the MIT license. Please see the [LICENSE](../LICENSE)
+Example projects are licensed under the MIT license. Please see the
+[LICENSE](../LICENSE).

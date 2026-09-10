@@ -29,9 +29,9 @@ AS=clang
 LD=clang
 
 TARGET_FLAGS=--target=aarch64-none-elf -mno-unaligned-access -ffreestanding
-ASFLAGS=-g -c $(TARGET_FLAGS)
-CFLAGS=-g -c $(TARGET_FLAGS)
-LDFLAGS=--target=aarch64-none-elf -nostdlib -g -T linker.ld
+ASFLAGS=$(TARGET_FLAGS) -g
+CFLAGS=$(ASFLAGS)
+LDFLAGS=$(CFLAGS) -nostdlib -T linker.ld
 
 FVP_MODEL ?= FVP_Base_AEMvA
 FVP_PARAMS = -C bp.secure_memory=false
@@ -68,10 +68,10 @@ clean:
 	$(call RM,$(EXECUTABLE))
 
 startup.o: startup.S
-	$(AS) $(ASFLAGS) startup.S -o $@
+	$(AS) $(ASFLAGS) -c startup.S -o $@
 
 hello.o: hello.c
-	$(CC) $(CFLAGS) hello.c -o $@
+	$(CC) $(CFLAGS) -c hello.c -o $@
 
 $(EXECUTABLE): $(OBJFILES) linker.ld
 	$(LD) $(OBJFILES) $(LDFLAGS) -o $@
