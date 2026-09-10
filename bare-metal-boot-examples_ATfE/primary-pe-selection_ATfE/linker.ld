@@ -3,36 +3,48 @@
  * SPDX-License-Identifier: MIT
  */
 
+/* Linker script to place sections and symbol values. */
+
+__ROM_BASE = 0x00000000;
+__ROM_SIZE = 0x04000000;
+
+__RAM_BASE = 0x04000000;
+__RAM_SIZE = 0x00080000;
+
 MEMORY
 {
-	ROM (rx)  : ORIGIN = 0x00000000, LENGTH = 64M
-	RAM (rwx) : ORIGIN = 0x04000000, LENGTH = 512K
+	ROM (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+	RAM (rwx) : ORIGIN = __RAM_BASE, LENGTH = __RAM_SIZE
 }
 
 ENTRY(_start)
 
 SECTIONS
 {
-	/* Place code and read-only data in ROM. */
-	.text 0x00000000 :
+	/* Read-only sections. */
+	.text :
 	{
-		KEEP(*(.text._start))
 		*(.text*)
-		*(.rodata*)
 	} > ROM
 
+	.rodata :
+	{
+		*(.rodata .rodata.*)
+	} > ROM
+
+	/* Read-write sections. */
 	.data :
 	{
 		. = ALIGN(8);
 		__data_start = .;
-		*(.data*)
+		*(.data .data.*)
 		. = ALIGN(8);
 		__data_end = .;
 	} > RAM AT > ROM
 	__data_source = LOADADDR(.data);
 	__data_size = __data_end - __data_start;
 
-	.bss (NOLOAD) :
+	.bss (NOLOAD):
 	{
 		. = ALIGN(8);
 		__bss_start = .;
@@ -40,25 +52,21 @@ SECTIONS
 		*(COMMON)
 		. = ALIGN(8);
 		__bss_end = .;
-	} > RAM
+	} > RAM AT > RAM
 	__bss_size = __bss_end - __bss_start;
 
-	.heap (NOLOAD) :
+	.heap (NOLOAD):
 	{
-		. = ALIGN(16);
+		. = ALIGN(64);
 		__heap_start = .;
-		_end = __heap_start;
-		end = __heap_start;
 		. = . + 0x4000;
-		. = ALIGN(16);
 		__heap_end = .;
-		__llvm_libc_heap_limit = __heap_end;
-	} > RAM
+	} > RAM AT > RAM
 
-	.stack (NOLOAD) :
+	.stack (NOLOAD):
 	{
-		. = ALIGN(16);
-		. = . + 0x4000;
+		. = ALIGN(64);
+		. = . + 8 * 0x4000;
 		__stack = .;
-	} > RAM
+	} > RAM AT > RAM
 }
